@@ -3,12 +3,14 @@ package io.inchtime.refreshkit.example
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import io.inchtime.refreshkit.indicators.BallClipRotateMultipleIndicator
+import io.inchtime.refreshkit.indicators.IOSIndicator
 import io.inchtime.refreshkit.indicators.VisualClockIndicator
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    var indicator: VisualClockIndicator? = null
+    var indicator: IOSIndicator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 //                .setAction("Action", null).show()
 //        }
 
-        indicator = VisualClockIndicator()
+        indicator = IOSIndicator()
 
         indicator?.color = Color.BLACK
 

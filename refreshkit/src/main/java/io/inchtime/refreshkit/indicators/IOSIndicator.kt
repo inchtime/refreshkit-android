@@ -2,38 +2,62 @@ package io.inchtime.refreshkit.indicators
 
 import android.animation.ValueAnimator
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
+import android.os.Build
 import android.view.animation.LinearInterpolator
 
-class IOSIndicator: Indicator() {
+class IOSIndicator : Indicator() {
 
     private var duration = 800L
 
-    private var secondHandDegree = 0f
+    private var degree = 0f
 
-    private var minuteHandDegree = 0f
+    private val colors = intArrayOf(
+        0xAADDDDDD.toInt(),
+        0xAADDDDDD.toInt(),
+        0xAADDDDDD.toInt(),
+        0xAACCCCCC.toInt(),
+        0xAABBBBBB.toInt(),
+        0xAAAAAAAA.toInt(),
+        0xAA999999.toInt(),
+        0xAA888888.toInt(),
+        0xAA777777.toInt(),
+        0xAA666666.toInt(),
+        0xAA555555.toInt(),
+        0xAA555555.toInt()
+    )
 
     override fun draw(canvas: Canvas, paint: Paint) {
 
-        paint.strokeWidth = 3f
-        paint.style = Paint.Style.STROKE
-
-        val x = (width / 2).toFloat()
-        val y = (height / 2).toFloat()
-
-        canvas.drawCircle(x, y, width / 2.0f - 8f, paint)
+        val x = width / 2f
+        val y = height / 2f
+        val radius = x / 12f
 
         canvas.save()
 
         canvas.translate(x, y)
-        canvas.rotate(secondHandDegree)
-        canvas.drawLine(0f, 0f, width / 3f, 0f, paint)
+
+        val d = degree - degree % 30
+
+        canvas.rotate(d)
+
+        for (i in 0 until colors.size) {
+
+            paint.style = Paint.Style.FILL
+            paint.color = colors[i]
+
+            canvas.rotate(30f)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                canvas.drawRoundRect(x / 2.5f, -radius, x, radius, radius, radius, paint)
+            } else {
+                canvas.drawRect(x / 2.5f, -radius, x, radius, paint)
+            }
+
+        }
 
         canvas.restore()
-
-        canvas.translate(x, y)
-        canvas.rotate(minuteHandDegree)
-        canvas.drawLine(0f, 0f, width / 4f, 0f, paint)
 
     }
 
@@ -41,25 +65,17 @@ class IOSIndicator: Indicator() {
 
         val animators = ArrayList<ValueAnimator>()
 
-        val secondHandAnimator = ValueAnimator.ofFloat(0f, 360f)
-        secondHandAnimator.interpolator = LinearInterpolator()
-        secondHandAnimator.duration = duration
-        secondHandAnimator.repeatCount = -1
-        addUpdateListener(secondHandAnimator, ValueAnimator.AnimatorUpdateListener { animation ->
-            secondHandDegree = animation.animatedValue as Float
+        val animator = ValueAnimator.ofFloat(0f, 360f)
+        animator.interpolator = LinearInterpolator()
+        animator.duration = duration
+        animator.repeatCount = -1
+        addUpdateListener(animator, ValueAnimator.AnimatorUpdateListener { animation ->
+            degree = animation.animatedValue as Float
             invalidateSelf()
         })
 
-        val minuteHandAnimator = ValueAnimator.ofFloat(0f, 360f)
-        minuteHandAnimator.interpolator = LinearInterpolator()
-        minuteHandAnimator.duration = duration * 6
-        minuteHandAnimator.repeatCount = -1
-        addUpdateListener(minuteHandAnimator, ValueAnimator.AnimatorUpdateListener { animation ->
-            minuteHandDegree = animation.animatedValue as Float
-            invalidateSelf()
-        })
-        animators.add(secondHandAnimator)
-        animators.add(minuteHandAnimator)
+        animators.add(animator)
+
         return animators
     }
 
